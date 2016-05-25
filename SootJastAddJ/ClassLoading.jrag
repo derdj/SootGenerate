@@ -33,7 +33,7 @@ aspect ClassLoading {
     refined(unit);
   }
 
-/*  refine ClassPath public CompilationUnit Program.getCompilationUnit(String name) {
+  refine ClassPath eq Program.getCompilationUnit(String name) {
     initPaths();
     try {
       if(sourceFiles.selectCompilationUnit(name))
@@ -104,5 +104,5 @@ aspect ClassLoading {
     }
     return null;
   }
-*/
+
 }
