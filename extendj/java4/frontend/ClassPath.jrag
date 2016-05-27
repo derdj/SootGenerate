@@ -422,4 +422,8 @@ aspect ClassPath {
   public void Program.addSourcePath(PathPart pathPart) {
     classPath.addSourcePath(pathPart);
   }
+  
+  public void Program.initPaths() {
+	classPath.initPaths();
+  }
 }

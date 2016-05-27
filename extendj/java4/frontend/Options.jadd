@@ -31,9 +31,13 @@
 import java.util.*;
 
 aspect AddOptionsToProgram {
-  public Options Program.options = new Options();
+/*  public Options Program.options = new Options();
   public Options Program.options() {
     return options;
+*/
+  public Options ASTNode$State.options = new Options();
+  public Options ASTNode.options() {
+    return state().options;
   }
 
   inh Program ASTNode.program();
