@@ -148,7 +148,7 @@ aspect EmitJimple {
       getSootClassDecl().addMethod(clinit);
     }
 
-    for(Iterator iter = nestedTypes().iterator(); iter.hasNext(); ) {
+    for(Iterator iter = nestedTypes.iterator(); iter.hasNext(); ) {
       TypeDecl typeDecl = (TypeDecl)iter.next();
       typeDecl.jimplify1phase2();
     }
@@ -933,7 +933,7 @@ aspect EmitJimple {
     super.jimplify2();
     if(clinit != null)
       jimplify2clinit();
-    for(Iterator iter = nestedTypes().iterator(); iter.hasNext(); ) {
+    for(Iterator iter = nestedTypes.iterator(); iter.hasNext(); ) {
       TypeDecl typeDecl = (TypeDecl)iter.next();
       typeDecl.jimplify2();
     }
@@ -963,9 +963,9 @@ aspect EmitJimple {
     HashSet list = new HashSet();
     if(isNestedType())
       list.add(this);
-    for(Iterator iter = nestedTypes().iterator(); iter.hasNext(); )
+    for(Iterator iter = nestedTypes.iterator(); iter.hasNext(); )
       list.add(iter.next());
-    for(Iterator iter = usedNestedTypes().iterator(); iter.hasNext(); )
+    for(Iterator iter = usedNestedTypes.iterator(); iter.hasNext(); )
       list.add(iter.next());
     return list;
   }
