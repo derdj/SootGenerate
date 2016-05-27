@@ -34,75 +34,78 @@ aspect ClassLoading {
   }
 
   refine ClassPath eq Program.getCompilationUnit(String name) {
-    initPaths();
-    try {
-      if(sourceFiles.selectCompilationUnit(name))
-        return sourceFiles.getCompilationUnit();
-      PathPart sourcePart = null;
-      PathPart classPart = null;
-      for(Iterator iter = sourcePath.iterator(); iter.hasNext() && sourcePart == null; ) {
-        PathPart part = (PathPart)iter.next();
-        if(part.selectCompilationUnit(name))
-          sourcePart = part;
-      }
-      for(Iterator iter = classPath.iterator(); iter.hasNext() && classPart == null; ) {
-        PathPart part = (PathPart)iter.next();
-        if(part.selectCompilationUnit(name))
-          classPart = part;
-      }
-      
-      if(sourcePart != null && srcPrec == SRC_PREC_JAVA) {
-        CompilationUnit unit = sourcePart.getCompilationUnit();
-        int index = name.lastIndexOf('.');
-        if(index == -1)
-          return unit;
-        String pkgName = name.substring(0, index);
-        if(pkgName.equals(unit.getPackageDecl()))
-          return unit;
-      }
-      if(classPart != null && srcPrec == SRC_PREC_CLASS) {
-        CompilationUnit unit = classPart.getCompilationUnit();
-        int index = name.lastIndexOf('.');
-        if(index == -1)
-          return unit;
-        String pkgName = name.substring(0, index);
-        if(pkgName.equals(unit.getPackageDecl()))
-          return unit;
-      }
-      if(srcPrec == SRC_PREC_ONLY_CLASS) {
-        if(classPart != null) {
-          CompilationUnit unit = classPart.getCompilationUnit();
-          int index = name.lastIndexOf('.');
+      classPath.initPaths();
+      try {
+      //  if(sourceFiles.selectCompilationUnit(name))
+      //    return sourceFiles.getCompilationUnit();
+        ClassSource sourcePart = ClassSource.NONE;
+        ClassSource classPart = ClassSource.NONE;
+        for (PathPart part: classPath.getSourcePath()) {
+            sourcePart = part.findSource(typeName);
+            if (sourcePart != ClassSource.NONE) {
+              break;
+            }
+          }
+          for (PathPart part: classPath.getClassPath()) {
+            classPart = part.findSource(typeName);
+            if (classPart != ClassSource.NONE) {
+              break;
+            }
+          }
+        
+        if(sourcePart != ClassSource.NONE && srcPrec == SRC_PREC_JAVA) {
+          CompilationUnit unit = sourcePart.parseCompilationUnit(this);
+          int index = typeName.lastIndexOf('.');
           if(index == -1)
             return unit;
-          String pkgName = name.substring(0, index);
+          String pkgName = typeName.substring(0, index);
           if(pkgName.equals(unit.getPackageDecl()))
             return unit;
         }
+        if(classPart != ClassSource.NONE && srcPrec == SRC_PREC_CLASS) {
+          CompilationUnit unit = classPart.parseCompilationUnit(this);
+          int index = typeName.lastIndexOf('.');
+          if(index == -1)
+            return unit;
+          String pkgName = typeName.substring(0, index);
+          if(pkgName.equals(unit.getPackageDecl()))
+            return unit;
+        }
+        if(srcPrec == SRC_PREC_ONLY_CLASS) {
+          if(classPart != null) {
+            CompilationUnit unit = classPart.parseCompilationUnit(this);
+            int index = typeName.lastIndexOf('.');
+            if(index == -1)
+              return unit;
+            String pkgName = typeName.substring(0, index);
+            if(pkgName.equals(unit.getPackageDecl()))
+              return unit;
+          }
+        }
+        else if(sourcePart != null && (classPart == ClassSource.NONE ||
+                classPart.lastModified() < sourcePart.lastModified())) {
+          CompilationUnit unit = sourcePart.parseCompilationUnit(this);
+          int index = typeName.lastIndexOf('.');
+          if(index == -1)
+            return unit;
+          String pkgName = typeName.substring(0, index);
+          if(pkgName.equals(unit.getPackageDecl()))
+            return unit;
+        }
+        else if(classPart != null) {
+          CompilationUnit unit = classPart.parseCompilationUnit(this);
+          int index = typeName.lastIndexOf('.');
+          if(index == -1)
+            return unit;
+          String pkgName = typeName.substring(0, index);
+          if(pkgName.equals(unit.getPackageDecl()))
+            return unit;
+        }
+        return emptyCompilationUnit();
       }
-      else if(sourcePart != null && (classPart == null || classPart.age <= sourcePart.age)) {
-        CompilationUnit unit = sourcePart.getCompilationUnit();
-        int index = name.lastIndexOf('.');
-        if(index == -1)
-          return unit;
-        String pkgName = name.substring(0, index);
-        if(pkgName.equals(unit.getPackageDecl()))
-          return unit;
+      catch(IOException e) {
       }
-      else if(classPart != null) {
-        CompilationUnit unit = classPart.getCompilationUnit();
-        int index = name.lastIndexOf('.');
-        if(index == -1)
-          return unit;
-        String pkgName = name.substring(0, index);
-        if(pkgName.equals(unit.getPackageDecl()))
-          return unit;
-      }
-      return null;
+      return emptyCompilationUnit();
     }
-    catch(IOException e) {
-    }
-    return null;
-  }
 
 }
