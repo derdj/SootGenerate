@@ -18,9 +18,16 @@ aspect ClassLoading {
   public CompilationUnit Program.getCachedOrLoadCompilationUnit(String fileName) {
     if(loadedCompilationUnit.containsKey(fileName))
       return (CompilationUnit)loadedCompilationUnit.get(fileName);
-    addSourceFile(fileName);
+	try {
+		this.addSourceFile(fileName);
+	} catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
     return (CompilationUnit)loadedCompilationUnit.get(fileName);
   }
+  
+
 
   refine void Program.addCompilationUnit(CompilationUnit unit) {
     try {

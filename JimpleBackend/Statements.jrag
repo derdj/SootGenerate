@@ -210,7 +210,7 @@ aspect Statements {
     ArrayList list = exceptionRanges();
     if(!inSynchronizedBlock())
       endExceptionRange(b, list);
-    for(Iterator iter = finallyList().iterator(); iter.hasNext(); ) {
+    for(Iterator iter = this.finallyIterator(); iter.hasNext(); ) {
       FinallyHost stmt = (FinallyHost)iter.next();
       stmt.emitFinallyCode(b);
     }
@@ -234,7 +234,7 @@ aspect Statements {
     ArrayList list = exceptionRanges();
     if(!inSynchronizedBlock())
       endExceptionRange(b, list);
-    for(Iterator iter = finallyList().iterator(); iter.hasNext(); ) {
+    for(Iterator iter = this.finallyIterator(); iter.hasNext(); ) {
       FinallyHost stmt = (FinallyHost)iter.next();
       stmt.emitFinallyCode(b);
     }
@@ -246,11 +246,11 @@ aspect Statements {
   }
 
   syn lazy boolean ReturnStmt.inSynchronizedBlock() =
-    !finallyList().isEmpty() && finallyList().iterator().next() instanceof SynchronizedStmt;
+    this.finallyIterator().hasNext() && this.finallyIterator().next() instanceof SynchronizedStmt;
   syn lazy boolean BreakStmt.inSynchronizedBlock() =
-    !finallyList().isEmpty() && finallyList().iterator().next() instanceof SynchronizedStmt;
+    this.finallyIterator().hasNext() && this.finallyIterator().next() instanceof SynchronizedStmt;
   syn lazy boolean ContinueStmt.inSynchronizedBlock() =
-    !finallyList().isEmpty() && finallyList().iterator().next() instanceof SynchronizedStmt;
+     this.finallyIterator().hasNext() && this.finallyIterator().next() instanceof SynchronizedStmt;
 
   public void ASTNode.endExceptionRange(Body b, ArrayList list) {
     if(list != null) {
@@ -282,7 +282,7 @@ aspect Statements {
       ArrayList list = exceptionRanges();
       if(!inSynchronizedBlock())
         endExceptionRange(b, list);
-      for(Iterator iter = finallyList().iterator(); iter.hasNext(); ) {
+      for(Iterator iter = this.finallyIterator(); iter.hasNext(); ) {
         FinallyHost stmt = (FinallyHost)iter.next();
         stmt.emitFinallyCode(b);
       }
@@ -296,7 +296,7 @@ aspect Statements {
       ArrayList list = exceptionRanges();
       if(!inSynchronizedBlock())
         endExceptionRange(b, list);
-      for(Iterator iter = finallyList().iterator(); iter.hasNext(); ) {
+      for(Iterator iter = this.finallyIterator(); iter.hasNext(); ) {
         FinallyHost stmt = (FinallyHost)iter.next();
         stmt.emitFinallyCode(b);
       }
@@ -321,7 +321,7 @@ aspect Statements {
   public void TryStmt.emitFinallyCode(Body b) {
     if(hasFinally()) {
       // Clear cached attributes to force re-evaluation of local variables
-      getFinally().flushCaches();
+      getFinally().flushAttrCache();
       getFinally().jimplify2(b);
     }
   }
@@ -458,6 +458,10 @@ aspect Statements {
     b.add(b.newIdentityStmt(local, b.newCaughtExceptionRef(getParameter()), this));
     getParameter().local = local;
     getBlock().jimplify2(b);
+  }
+  
+  public ParameterDeclaration CatchClause.getParameter() {
+        return (ParameterDeclaration)getChild(0);
   }
 
   inh TypeDecl TryStmt.typeThrowable();
