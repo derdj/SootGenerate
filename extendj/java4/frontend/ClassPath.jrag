@@ -160,7 +160,7 @@ aspect ClassPath {
     /**
      * Set up the classpaths (standard + boot classpath).
      */
-    private synchronized void initPaths() {
+    protected synchronized void initPaths() {
       if (pathsInitialized) {
         return;
       }
